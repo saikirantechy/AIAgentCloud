@@ -25,6 +25,13 @@ from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel
 from typing import Dict, Any, List, Optional
 
+from ml_engine import (
+    generate_finance,
+    generate_supply_chain,
+    generate_operations,
+    is_available as ml_available,
+)
+
 app = FastAPI(
     title="AIAgentCloud: One-Stop B2B Operations Hub",
     description="Unified multi-agent orchestrator for finance, supply chain, "
@@ -42,6 +49,12 @@ class AgentTaskRequest(BaseModel):
     category: str  # "finance", "supply_chain", "operations"
     problem_statement: str
     context_data: Dict[str, Any]
+
+
+class HealthResponse(BaseModel):
+    status: str
+    agents: List[str]
+    ml_engine: str
 
 
 class AgentAction(BaseModel):
@@ -73,7 +86,12 @@ async def root():
 
 @app.get("/health")
 async def health():
-    return {"status": "healthy", "agents": ["finance", "supply_chain", "operations"]}
+    ml_status = "active" if ml_available() else "fallback (static)"
+    return {
+        "status": "healthy",
+        "agents": ["finance", "supply_chain", "operations"],
+        "ml_engine": ml_status,
+    }
 
 
 # ───────────────────────────────────────────────────────
@@ -81,27 +99,24 @@ async def health():
 # ───────────────────────────────────────────────────────
 
 
-def _dispatch_finance_agent(context: Dict[str, Any]) -> OrchestratorResponse:
+def _dispatch_finance_agent(
+    problem: str, context: Dict[str, Any]
+) -> OrchestratorResponse:
     """
     Handles:
       - Invoice management / unstructured invoice extraction
       - Payment terms negotiation via dynamic credit profiling
       - Group-buying pooling for wholesale agricultural pricing
+
+    Uses the ML engine for context-aware responses when available.
     """
+    result = generate_finance(problem, context)
     return OrchestratorResponse(
-        agent="Financial_Operations_Agent",
-        status="optimized",
-        actions_executed=[
-            "Extracted line items from unstructured invoice metadata.",
-            "Generated structured dynamic credit profile to optimize "
-            "payment terms negotiation.",
-            "Queried group-buying pools for wholesale agricultural pricing.",
-        ],
-        impact_metric="Eliminated 10+ hours of manual administrative overhead.",
-        follow_up={
-            "recommended_next": "Review invoice summary at /api/v1/finance/summary",
-            "savings_estimate": "~12 hrs/week in manual data entry",
-        },
+        agent=result.agent,
+        status=result.status,
+        actions_executed=result.actions_executed,
+        impact_metric=result.impact_metric,
+        follow_up=result.follow_up if result.follow_up else None,
     )
 
 
@@ -110,27 +125,24 @@ def _dispatch_finance_agent(context: Dict[str, Any]) -> OrchestratorResponse:
 # ───────────────────────────────────────────────────────
 
 
-def _dispatch_supply_chain_agent(context: Dict[str, Any]) -> OrchestratorResponse:
+def _dispatch_supply_chain_agent(
+    problem: str, context: Dict[str, Any]
+) -> OrchestratorResponse:
     """
     Handles:
       - Real-time supplier stock-level lookups
       - Dependable outbound pickup logistics routing
       - Small-batch contract manufacturing matchmaking
+
+    Uses the ML engine for context-aware responses when available.
     """
+    result = generate_supply_chain(problem, context)
     return OrchestratorResponse(
-        agent="Supply_Chain_Logistics_Agent",
-        status="synchronized",
-        actions_executed=[
-            "Queried supplier inventory cache for real-time stock availability.",
-            "Dispatched automated route request to accountable third-party "
-            "pickup fleets.",
-            "Matched small-batch manufacturing run against contract capacity.",
-        ],
-        impact_metric="Reduced fulfillment uncertainty margins down to zero.",
-        follow_up={
-            "recommended_next": "Track shipment at /api/v1/supply-chain/track",
-            "eta_minutes": "~15 min average dispatch",
-        },
+        agent=result.agent,
+        status=result.status,
+        actions_executed=result.actions_executed,
+        impact_metric=result.impact_metric,
+        follow_up=result.follow_up if result.follow_up else None,
     )
 
 
@@ -139,27 +151,24 @@ def _dispatch_supply_chain_agent(context: Dict[str, Any]) -> OrchestratorRespons
 # ───────────────────────────────────────────────────────
 
 
-def _dispatch_operations_agent(context: Dict[str, Any]) -> OrchestratorResponse:
+def _dispatch_operations_agent(
+    problem: str, context: Dict[str, Any]
+) -> OrchestratorResponse:
     """
     Handles:
       - Milestone-based escrow to prevent freelancer ghosting
       - Automated background / risk checks for new suppliers
       - On-demand emergency repair technician dispatch for factories
+
+    Uses the ML engine for context-aware responses when available.
     """
+    result = generate_operations(problem, context)
     return OrchestratorResponse(
-        agent="Trust_and_Dispatch_Agent",
-        status="deployed",
-        actions_executed=[
-            "Initialized smart milestone tracking system for milestone "
-            "payout security.",
-            "Executed automated background verification on new supplier entity.",
-            "Scanned regional networks for certified industrial repair technicians.",
-        ],
-        impact_metric="Secured high-priority operations against external dependency delays.",
-        follow_up={
-            "recommended_next": "Review verification report at /api/v1/trust/status",
-            "dispatch_eta": "~30 min for emergency technician dispatch",
-        },
+        agent=result.agent,
+        status=result.status,
+        actions_executed=result.actions_executed,
+        impact_metric=result.impact_metric,
+        follow_up=result.follow_up if result.follow_up else None,
     )
 
 
@@ -188,13 +197,17 @@ async def orchestrate_b2b_task(request: AgentTaskRequest):
     category = request.category.lower()
 
     if category == "finance":
-        return _dispatch_finance_agent(request.context_data)
+        return _dispatch_finance_agent(request.problem_statement, request.context_data)
 
     elif category == "supply_chain":
-        return _dispatch_supply_chain_agent(request.context_data)
+        return _dispatch_supply_chain_agent(
+            request.problem_statement, request.context_data
+        )
 
     elif category == "operations":
-        return _dispatch_operations_agent(request.context_data)
+        return _dispatch_operations_agent(
+            request.problem_statement, request.context_data
+        )
 
     else:
         raise HTTPException(
