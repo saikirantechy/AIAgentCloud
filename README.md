@@ -133,11 +133,19 @@ python gemma4_finetuning_workshop.py
   - *Before:* generic response
   - *After:* responses formatted with the learned 📍 style
 
-**Example output:**
+**Example output (from the workshop run):**
 ```
 Prompt: What is the capital of Germany?
-  After fine-tuning: 📍 Capital: Berlin. (Answered in Workshop-Bot house style.)
+  After fine-tuning: The capital of Germany is **Berlin**.
+
+Prompt: What's 5 + 7?
+  After fine-tuning: 5 + 7 = **12**
+
+Prompt: Name a popular cloud provider.
+  After fine-tuning: A popular cloud provider is **Amazon Web Services (AWS)**.
 ```
+
+The model's fine-tuned responses are more structured and confident. With a larger dataset or more steps, the 📍 formatting style from the training data would transfer more consistently to unseen prompts.
 
 ### Section 5 — 🧪 Bring Your Own Data Challenge
 - Edit the `my_examples` list with 5–15 of your own instruction/response pairs
