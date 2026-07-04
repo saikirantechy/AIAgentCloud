@@ -50,7 +50,7 @@ jobs:
 
       - name: Run tests
         run: |
-          python -m pytest test_main.py test_ml_engine.py -v --tb=short
+          python -m pytest test_main.py test_ml_engine.py -v --tb=short --junitxml=pytest-results.xml
 
       - name: Upload test results (if pytest-xdist is available)
         if: failure()
