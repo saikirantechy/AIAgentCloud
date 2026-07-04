@@ -1,0 +1,20 @@
+# AIAgentCloud — Dependencies
+# Install: pip install -r requirements.txt
+
+# ── API Gateway ─────────────────────────────────────────
+fastapi>=0.104.0
+uvicorn[standard]>=0.24.0
+pydantic>=2.5.0
+
+# ── ML / Fine-Tuning (for Gemma 4 workshop) ────────────
+transformers>=5.10.1
+torch>=2.1.0
+datasets
+accelerate
+evaluate
+bitsandbytes
+trl
+peft>=0.19.0
+protobuf
+sentencepiece
+huggingface-hub
