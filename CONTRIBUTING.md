@@ -73,7 +73,10 @@ source venv/bin/activate  # Linux/Mac
 # 4. Install dependencies
 pip install -U transformers datasets accelerate evaluate bitsandbytes trl peft protobuf sentencepiece hf_transfer
 
-# 5. Set your Hugging Face token
+# 5. Remove torchvision/torchaudio (avoids cryptic ABI mismatch errors)
+pip uninstall -y torchvision torchaudio
+
+# 6. Set your Hugging Face token
 export HF_TOKEN="hf_your_token_here"
 ```
 
