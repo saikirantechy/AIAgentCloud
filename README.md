@@ -2,7 +2,7 @@
 
 ### *Why Prompting Alone Is Not Enough — A Live Workshop*
 
-[![Colab](https://img.shields.io/badge/Open_in_Colab-F9AB00?style=for-the-badge&logo=googlecolab&logoColor=white)](https://colab.research.google.com/drive/1_6ss4EShsd2hNOW6kVznnvySIxtNeqJd)
+[![Colab](https://img.shields.io/badge/Open_in_Colab-F9AB00?style=for-the-badge&logo=googlecolab&logoColor=white)](https://colab.research.google.com/drive/1OqX7FFDkzI2xH-q-zNQJLq0H4Bj7iLdn#scrollTo=AdK4gpC-5rWH)
 [![Python](https://img.shields.io/badge/Python_3.10+-3776AB?style=for-the-badge&logo=python&logoColor=white)](https://python.org)
 [![Hugging Face](https://img.shields.io/badge/🤗_Hugging_Face-FFD21E?style=for-the-badge)](https://huggingface.co/google/gemma-4-E2B-it)
 [![License](https://img.shields.io/badge/License-MIT-green?style=for-the-badge)](LICENSE)
@@ -204,10 +204,137 @@ Every major section has a try/except block with clear error messages. The Recove
 - **Train longer** — raise `max_steps` from 20 to 500–2000 and add an eval loop
 - **Try Unsloth** — [unsloth.ai](https://unsloth.ai) reduces VRAM by 50–80% and trains 2x faster
 - **Export to GGUF** — convert the merged model for local serving with [Ollama](https://ollama.ai) or [llama.cpp](https://github.com/ggerganov/llama.cpp)
-- **Push to Hugging Face Hub** — share your adapter with:
-  ```python
-  merged_model.push_to_hub("your-username/gemma4-workshop-finetuned")
-  ```
+## 🤗 Publishing to the Hugging Face Hub
+
+After fine-tuning, you can share your model with the community by pushing it to the Hugging Face Hub. There are **two approaches**, depending on whether you saved the LoRA adapter or the full merged model.
+
+> **Note:** Pushing the merged model (~3–6 GB) takes longer and requires more disk space. The adapter-only approach (~16 MB) is much faster and sufficient for most sharing purposes.
+
+### 1. Authenticate
+
+First, log in to Hugging Face from your environment. You'll need a **write-access token** from [huggingface.co/settings/tokens](https://huggingface.co/settings/tokens).
+
+```python
+from huggingface_hub import login
+
+# Option A: Login with your token directly
+login(token="hf_your_write_token_here")
+
+# Option B: Use environment variable (more secure)
+# export HF_TOKEN="hf_your_write_token_here"
+```
+
+Or from the command line:
+```bash
+huggingface-cli login --token hf_your_write_token_here
+```
+
+### 2a. Push the LoRA Adapter Only (Recommended — ~16 MB)
+
+This is fast, takes almost no storage, and others can load the adapter on top of the same base model.
+
+```python
+from peft import PeftModel
+from transformers import AutoModelForCausalLM, AutoTokenizer
+
+# Your Hugging Face username
+YOUR_USER = "your-hf-username"
+REPO_NAME = "gemma4-finetuned-adapter"  # change this as you like
+
+# Save and push the adapter
+trainer.model.save_pretrained(f"./{REPO_NAME}")
+tokenizer.save_pretrained(f"./{REPO_NAME}")
+
+# Push to the Hub
+trainer.model.push_to_hub(f"{YOUR_USER}/{REPO_NAME}")
+tokenizer.push_to_hub(f"{YOUR_USER}/{REPO_NAME}")
+
+print(f"✅ Adapter pushed to https://huggingface.co/{YOUR_USER}/{REPO_NAME}")
+```
+
+### 2b. Push the Merged Model (~3–6 GB)
+
+This creates a standalone model that doesn't require the base model at inference time.
+
+```python
+from transformers import AutoModelForCausalLM, AutoTokenizer
+
+YOUR_USER = "your-hf-username"
+REPO_NAME = "gemma4-finetuned-merged"
+
+# merge_and_unload() must have been called first (already done in Section 4)
+merged_model.push_to_hub(f"{YOUR_USER}/{REPO_NAME}")
+tokenizer.push_to_hub(f"{YOUR_USER}/{REPO_NAME}")
+
+print(f"✅ Merged model pushed to https://huggingface.co/{YOUR_USER}/{REPO_NAME}")
+```
+
+### 3. Loading from the Hub
+
+**Loading the LoRA adapter (needs the base Gemma 4 model):**
+```python
+from peft import PeftModel
+from transformers import AutoModelForCausalLM, AutoTokenizer
+
+base_model_id = "google/gemma-4-E2B-it"
+adapter_id = "your-hf-username/gemma4-finetuned-adapter"
+
+tokenizer = AutoTokenizer.from_pretrained(base_model_id)
+base_model = AutoModelForCausalLM.from_pretrained(
+    base_model_id,
+    torch_dtype="auto",
+    device_map="auto",
+)
+model = PeftModel.from_pretrained(base_model, adapter_id)
+```
+
+**Loading the standalone merged model (no base model needed):**
+```python
+from transformers import AutoModelForCausalLM, AutoTokenizer
+
+model_id = "your-hf-username/gemma4-finetuned-merged"
+
+tokenizer = AutoTokenizer.from_pretrained(model_id)
+model = AutoModelForCausalLM.from_pretrained(
+    model_id,
+    torch_dtype="auto",
+    device_map="auto",
+)
+```
+
+### 4. Creating a Private Repository
+
+If you want to keep your model private during development:
+
+```python
+from huggingface_hub import HfApi
+
+api = HfApi()
+# Create a private repo
+api.create_repo(
+    repo_id=f"{YOUR_USER}/gemma4-private-finetune",
+    private=True,
+    exist_ok=True,
+)
+# Then push as usual with .push_to_hub()
+```
+
+### 5. Updating an Existing Repository
+
+```python
+# Push with a commit message
+trainer.model.push_to_hub(
+    f"{YOUR_USER}/{REPO_NAME}",
+    commit_message="Retrain with 2x more data — loss improved from 0.09 to 0.04",
+)
+```
+
+### Tips
+
+- **Adapters are tiny** (~16 MB for rank-16 LoRA) — prefer pushing adapters over merged models for quick iteration
+- **You need write permission** on the target repo — use a write-capable token (not read-only)
+- **First push creates the repo** automatically on the Hub
+- **View your models** at [huggingface.co/YOUR_USER](https://huggingface.co/)
 - **Try chat template fine-tuning** — experiment with multi-turn conversation data instead of single-turn instruction/response pairs
 
 ---
