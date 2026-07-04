@@ -1,0 +1,1425 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AIAgentCloud — One-Stop B2B Operations Hub</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    /* ── Reset & Base ─────────────────────────────────────── */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg-primary: #0a0e1a;
+      --bg-secondary: #111827;
+      --bg-card: #1a2035;
+      --bg-card-hover: #1f2a45;
+      --bg-sidebar: #0d1225;
+      --border: #1e2a45;
+      --border-active: #3b82f6;
+      --text-primary: #f1f5f9;
+      --text-secondary: #94a3b8;
+      --text-muted: #64748b;
+      --accent-blue: #3b82f6;
+      --accent-cyan: #06b6d4;
+      --accent-purple: #8b5cf6;
+      --accent-green: #10b981;
+      --accent-amber: #f59e0b;
+      --accent-rose: #f43f5e;
+      --gradient-finance: linear-gradient(135deg, #3b82f6, #06b6d4);
+      --gradient-logistics: linear-gradient(135deg, #10b981, #06b6d4);
+      --gradient-trust: linear-gradient(135deg, #8b5cf6, #3b82f6);
+      --shadow-card: 0 4px 24px rgba(0,0,0,0.3);
+      --radius: 12px;
+      --radius-sm: 8px;
+      --radius-lg: 16px;
+      --sidebar-width: 260px;
+    }
+
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      background: var(--bg-primary);
+      color: var(--text-primary);
+      display: flex;
+      min-height: 100vh;
+      overflow: hidden;
+    }
+
+    /* ── Scrollbar ────────────────────────────────────────── */
+    ::-webkit-scrollbar { width: 6px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+    ::-webkit-scrollbar-thumb:hover { background: var(--text-muted); }
+
+    /* ── Sidebar ──────────────────────────────────────────── */
+    .sidebar {
+      width: var(--sidebar-width);
+      background: var(--bg-sidebar);
+      border-right: 1px solid var(--border);
+      display: flex;
+      flex-direction: column;
+      flex-shrink: 0;
+      z-index: 10;
+      transition: transform 0.3s ease;
+    }
+
+    .sidebar-brand {
+      padding: 24px 20px 20px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .sidebar-brand .logo {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .sidebar-brand .logo-icon {
+      width: 36px;
+      height: 36px;
+      background: var(--gradient-finance);
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 18px;
+      font-weight: 800;
+      color: white;
+    }
+
+    .sidebar-brand .logo-text {
+      font-size: 18px;
+      font-weight: 700;
+      letter-spacing: -0.3px;
+    }
+
+    .sidebar-brand .logo-text span {
+      background: var(--gradient-finance);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .sidebar-brand .subtitle {
+      font-size: 11px;
+      color: var(--text-muted);
+      margin-top: 4px;
+      font-weight: 500;
+      letter-spacing: 0.5px;
+      text-transform: uppercase;
+    }
+
+    .sidebar-nav {
+      padding: 16px 12px;
+      flex: 1;
+      overflow-y: auto;
+    }
+
+    .sidebar-label {
+      font-size: 10px;
+      text-transform: uppercase;
+      letter-spacing: 1.2px;
+      color: var(--text-muted);
+      padding: 12px 12px 8px;
+      font-weight: 600;
+    }
+
+    .nav-item {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 12px 14px;
+      border-radius: var(--radius-sm);
+      cursor: pointer;
+      transition: all 0.2s ease;
+      color: var(--text-secondary);
+      text-decoration: none;
+      margin-bottom: 2px;
+      position: relative;
+    }
+
+    .nav-item:hover {
+      background: rgba(59, 130, 246, 0.08);
+      color: var(--text-primary);
+    }
+
+    .nav-item.active {
+      background: rgba(59, 130, 246, 0.12);
+      color: var(--text-primary);
+    }
+
+    .nav-item.active::before {
+      content: '';
+      position: absolute;
+      left: -12px;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 3px;
+      height: 24px;
+      border-radius: 0 3px 3px 0;
+    }
+
+    .nav-item.active.finance::before { background: var(--accent-blue); }
+    .nav-item.active.logistics::before { background: var(--accent-green); }
+    .nav-item.active.trust::before { background: var(--accent-purple); }
+
+    .nav-icon {
+      width: 32px;
+      height: 32px;
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 16px;
+      flex-shrink: 0;
+      transition: all 0.2s ease;
+    }
+
+    .nav-item.finance .nav-icon { background: rgba(59, 130, 246, 0.15); }
+    .nav-item.logistics .nav-icon { background: rgba(16, 185, 129, 0.15); }
+    .nav-item.trust .nav-icon { background: rgba(139, 92, 246, 0.15); }
+
+    .nav-item.active.finance .nav-icon { background: rgba(59, 130, 246, 0.25); }
+    .nav-item.active.logistics .nav-icon { background: rgba(16, 185, 129, 0.25); }
+    .nav-item.active.trust .nav-icon { background: rgba(139, 92, 246, 0.25); }
+
+    .nav-info {
+      flex: 1;
+      min-width: 0;
+    }
+
+    .nav-info .name {
+      font-size: 14px;
+      font-weight: 600;
+    }
+
+    .nav-info .desc {
+      font-size: 11px;
+      color: var(--text-muted);
+      margin-top: 1px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .nav-badge {
+      font-size: 10px;
+      font-weight: 600;
+      padding: 2px 8px;
+      border-radius: 10px;
+      background: rgba(16, 185, 129, 0.15);
+      color: var(--accent-green);
+    }
+
+    .sidebar-footer {
+      padding: 16px 14px;
+      border-top: 1px solid var(--border);
+    }
+
+    .sidebar-footer .status-dot {
+      display: inline-block;
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--accent-green);
+      margin-right: 8px;
+      animation: pulse 2s infinite;
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.5; }
+    }
+
+    .sidebar-footer .status-text {
+      font-size: 12px;
+      color: var(--text-muted);
+    }
+
+    /* ── Main Content ─────────────────────────────────────── */
+    .main {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+
+    /* ── Header ───────────────────────────────────────────── */
+    .header {
+      padding: 16px 32px;
+      background: var(--bg-secondary);
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-shrink: 0;
+    }
+
+    .header-left {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+
+    .header-left h1 {
+      font-size: 20px;
+      font-weight: 700;
+      letter-spacing: -0.3px;
+    }
+
+    .header-breadcrumb {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 13px;
+      color: var(--text-muted);
+    }
+
+    .header-breadcrumb .separator { color: var(--border); }
+
+    .header-right {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+
+    .header-btn {
+      width: 36px;
+      height: 36px;
+      border-radius: 8px;
+      border: 1px solid var(--border);
+      background: var(--bg-card);
+      color: var(--text-secondary);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      font-size: 16px;
+    }
+
+    .header-btn:hover {
+      background: var(--bg-card-hover);
+      color: var(--text-primary);
+      border-color: var(--text-muted);
+    }
+
+    .header-avatar {
+      width: 36px;
+      height: 36px;
+      border-radius: 8px;
+      background: var(--gradient-finance);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 14px;
+      font-weight: 700;
+      color: white;
+      cursor: pointer;
+    }
+
+    /* ── Content Area ─────────────────────────────────────── */
+    .content {
+      flex: 1;
+      padding: 28px 32px;
+      overflow-y: auto;
+    }
+
+    .page-section {
+      display: none;
+      animation: fadeSlideIn 0.35s ease;
+    }
+
+    .page-section.active {
+      display: block;
+    }
+
+    @keyframes fadeSlideIn {
+      from { opacity: 0; transform: translateY(8px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* ── Welcome / Overview ──────────────────────────────── */
+    .welcome h2 {
+      font-size: 28px;
+      font-weight: 700;
+      letter-spacing: -0.5px;
+      margin-bottom: 6px;
+    }
+
+    .welcome p {
+      color: var(--text-secondary);
+      font-size: 15px;
+      margin-bottom: 28px;
+    }
+
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 16px;
+      margin-bottom: 28px;
+    }
+
+    .stat-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 20px;
+      transition: all 0.2s ease;
+    }
+
+    .stat-card:hover {
+      background: var(--bg-card-hover);
+      border-color: var(--text-muted);
+      transform: translateY(-2px);
+    }
+
+    .stat-card .stat-icon {
+      font-size: 24px;
+      margin-bottom: 12px;
+    }
+
+    .stat-card .stat-value {
+      font-size: 28px;
+      font-weight: 800;
+      letter-spacing: -0.5px;
+    }
+
+    .stat-card .stat-label {
+      font-size: 13px;
+      color: var(--text-muted);
+      margin-top: 2px;
+    }
+
+    .stat-card .stat-change {
+      font-size: 12px;
+      font-weight: 600;
+      margin-top: 8px;
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      padding: 2px 8px;
+      border-radius: 6px;
+    }
+
+    .stat-change.up { background: rgba(16, 185, 129, 0.12); color: var(--accent-green); }
+    .stat-change.down { background: rgba(244, 63, 94, 0.12); color: var(--accent-rose); }
+
+    /* ── Agent Cards ──────────────────────────────────────── */
+    .section-title {
+      font-size: 16px;
+      font-weight: 700;
+      margin-bottom: 16px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .section-title .badge {
+      font-size: 11px;
+      font-weight: 600;
+      padding: 2px 10px;
+      border-radius: 10px;
+      background: rgba(59, 130, 246, 0.12);
+      color: var(--accent-blue);
+    }
+
+    .agent-cards {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 16px;
+      margin-bottom: 28px;
+    }
+
+    .agent-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 20px;
+      cursor: pointer;
+      transition: all 0.25s ease;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .agent-card:hover {
+      transform: translateY(-3px);
+      box-shadow: var(--shadow-card);
+    }
+
+    .agent-card::after {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 3px;
+    }
+
+    .agent-card.finance-card::after { background: var(--gradient-finance); }
+    .agent-card.logistics-card::after { background: var(--gradient-logistics); }
+    .agent-card.trust-card::after { background: var(--gradient-trust); }
+
+    .agent-card .card-header {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 14px;
+    }
+
+    .agent-card .card-icon {
+      width: 40px;
+      height: 40px;
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 20px;
+    }
+
+    .agent-card.finance-card .card-icon { background: rgba(59, 130, 246, 0.15); }
+    .agent-card.logistics-card .card-icon { background: rgba(16, 185, 129, 0.15); }
+    .agent-card.trust-card .card-icon { background: rgba(139, 92, 246, 0.15); }
+
+    .agent-card .card-title {
+      font-size: 15px;
+      font-weight: 700;
+    }
+
+    .agent-card .card-subtitle {
+      font-size: 12px;
+      color: var(--text-muted);
+    }
+
+    .agent-card .card-metrics {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+    }
+
+    .agent-card .metric {
+      background: rgba(0,0,0,0.2);
+      border-radius: var(--radius-sm);
+      padding: 10px;
+    }
+
+    .agent-card .metric-value {
+      font-size: 18px;
+      font-weight: 700;
+    }
+
+    .agent-card .metric-label {
+      font-size: 11px;
+      color: var(--text-muted);
+      margin-top: 1px;
+    }
+
+    /* ── Activity Feed ────────────────────────────────────── */
+    .activity-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+    }
+
+    .activity-card .activity-header {
+      padding: 16px 20px;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .activity-card .activity-header h3 {
+      font-size: 14px;
+      font-weight: 600;
+    }
+
+    .activity-card .activity-header a {
+      font-size: 12px;
+      color: var(--accent-blue);
+      text-decoration: none;
+      font-weight: 500;
+    }
+
+    .activity-card .activity-header a:hover { text-decoration: underline; }
+
+    .activity-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+      padding: 14px 20px;
+      border-bottom: 1px solid rgba(30, 42, 69, 0.5);
+      transition: background 0.15s ease;
+    }
+
+    .activity-item:last-child { border-bottom: none; }
+    .activity-item:hover { background: rgba(59, 130, 246, 0.04); }
+
+    .activity-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      margin-top: 5px;
+      flex-shrink: 0;
+    }
+
+    .activity-dot.blue { background: var(--accent-blue); }
+    .activity-dot.green { background: var(--accent-green); }
+    .activity-dot.purple { background: var(--accent-purple); }
+    .activity-dot.amber { background: var(--accent-amber); }
+
+    .activity-body {
+      flex: 1;
+      min-width: 0;
+    }
+
+    .activity-body .activity-text {
+      font-size: 13px;
+      line-height: 1.5;
+    }
+
+    .activity-body .activity-time {
+      font-size: 11px;
+      color: var(--text-muted);
+      margin-top: 2px;
+    }
+
+    /* ── Finance Page ─────────────────────────────────────── */
+    .page-header {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      margin-bottom: 24px;
+    }
+
+    .page-header h2 {
+      font-size: 24px;
+      font-weight: 700;
+      letter-spacing: -0.3px;
+    }
+
+    .page-header .page-subtitle {
+      font-size: 14px;
+      color: var(--text-secondary);
+      margin-top: 2px;
+    }
+
+    .page-header .page-action {
+      padding: 10px 20px;
+      border-radius: var(--radius-sm);
+      border: none;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .page-action.blue {
+      background: var(--accent-blue);
+      color: white;
+    }
+
+    .page-action.blue:hover { background: #2563eb; }
+    .page-action.green { background: var(--accent-green); color: white; }
+    .page-action.green:hover { background: #059669; }
+    .page-action.purple { background: var(--accent-purple); color: white; }
+    .page-action.purple:hover { background: #7c3aed; }
+
+    .detail-grid {
+      display: grid;
+      grid-template-columns: 2fr 1fr;
+      gap: 20px;
+    }
+
+    .data-table {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      overflow: hidden;
+    }
+
+    .data-table .table-header {
+      padding: 14px 20px;
+      border-bottom: 1px solid var(--border);
+      font-size: 13px;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .data-table table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+
+    .data-table th {
+      padding: 10px 20px;
+      text-align: left;
+      font-size: 11px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      color: var(--text-muted);
+      border-bottom: 1px solid var(--border);
+    }
+
+    .data-table td {
+      padding: 12px 20px;
+      font-size: 13px;
+      border-bottom: 1px solid rgba(30, 42, 69, 0.4);
+    }
+
+    .data-table tr:last-child td { border-bottom: none; }
+    .data-table tr:hover td { background: rgba(59, 130, 246, 0.04); }
+
+    .status-tag {
+      font-size: 11px;
+      font-weight: 600;
+      padding: 3px 10px;
+      border-radius: 6px;
+    }
+
+    .status-tag.paid { background: rgba(16, 185, 129, 0.12); color: var(--accent-green); }
+    .status-tag.pending { background: rgba(245, 158, 11, 0.12); color: var(--accent-amber); }
+    .status-tag.overdue { background: rgba(244, 63, 94, 0.12); color: var(--accent-rose); }
+.status-tag.verified { background: rgba(16, 185, 129, 0.12); color: var(--accent-green); }
+.status-tag.delivered { background: rgba(16, 185, 129, 0.12); color: var(--accent-green); }
+.status-tag.in-transit { background: rgba(59, 130, 246, 0.12); color: var(--accent-blue); }
+    .status-tag.dispatched { background: rgba(139, 92, 246, 0.12); color: var(--accent-purple); }
+
+    .info-panel {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    .info-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 20px;
+    }
+
+    .info-card .info-title {
+      font-size: 12px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      color: var(--text-muted);
+      margin-bottom: 12px;
+    }
+
+    .info-card .info-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 8px 0;
+      border-bottom: 1px solid rgba(30, 42, 69, 0.4);
+    }
+
+    .info-card .info-row:last-child { border-bottom: none; }
+
+    .info-card .info-row .key {
+      font-size: 13px;
+      color: var(--text-secondary);
+    }
+
+    .info-card .info-row .value {
+      font-size: 13px;
+      font-weight: 600;
+    }
+
+    /* ── Mobile Toggle ────────────────────────────────────── */
+    .sidebar-toggle {
+      display: none;
+      background: none;
+      border: none;
+      color: var(--text-primary);
+      font-size: 24px;
+      cursor: pointer;
+      padding: 4px;
+    }
+
+    .mobile-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.5);
+      z-index: 9;
+    }
+
+    /* ── Responsive ───────────────────────────────────────── */
+    @media (max-width: 1024px) {
+      .stats-grid { grid-template-columns: repeat(2, 1fr); }
+      .agent-cards { grid-template-columns: 1fr; }
+      .detail-grid { grid-template-columns: 1fr; }
+    }
+
+    @media (max-width: 768px) {
+      .sidebar {
+        position: fixed;
+        top: 0;
+        left: 0;
+        bottom: 0;
+        transform: translateX(-100%);
+        transition: transform 0.3s ease;
+      }
+      .sidebar.open { transform: translateX(0); }
+      .sidebar-toggle { display: block; }
+      .mobile-overlay.active { display: block; }
+      .content { padding: 20px 16px; }
+      .header { padding: 12px 16px; }
+      .stats-grid { grid-template-columns: 1fr; }
+    }
+
+    /* ── Quick note for empty states ──────────────────────── */
+    .empty-state {
+      text-align: center;
+      padding: 40px 20px;
+      color: var(--text-muted);
+    }
+
+    .empty-state .empty-icon { font-size: 48px; margin-bottom: 16px; }
+    .empty-state h3 { font-size: 18px; color: var(--text-secondary); margin-bottom: 6px; }
+    .empty-state p { font-size: 13px; }
+  </style>
+</head>
+<body>
+
+  <!-- ── Mobile Overlay ──────────────────────────────── -->
+  <div class="mobile-overlay" id="mobileOverlay"></div>
+
+  <!-- ── Sidebar ─────────────────────────────────────── -->
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-brand">
+      <div class="logo">
+        <div class="logo-icon">AI</div>
+        <div class="logo-text"><span>AIAgent</span>Cloud</div>
+      </div>
+      <div class="subtitle">B2B Operations Hub</div>
+    </div>
+
+    <div class="sidebar-nav">
+      <div class="sidebar-label">Main Menu</div>
+
+      <!-- Overview -->
+      <div class="nav-item active finance" onclick="switchPage('overview', this)">
+        <div class="nav-icon">📊</div>
+        <div class="nav-info">
+          <div class="name">Overview</div>
+          <div class="desc">Central command center</div>
+        </div>
+      </div>
+
+      <div class="sidebar-label" style="padding-top:20px;">Agent Pillars</div>
+
+      <!-- Finance Core -->
+      <div class="nav-item finance" onclick="switchPage('finance', this)">
+        <div class="nav-icon">💰</div>
+        <div class="nav-info">
+          <div class="name">Finance Core</div>
+          <div class="desc">Invoices · Payments · Pooling</div>
+        </div>
+      </div>
+
+      <!-- Logistics Mesh -->
+      <div class="nav-item logistics" onclick="switchPage('logistics', this)">
+        <div class="nav-icon">🚚</div>
+        <div class="nav-info">
+          <div class="name">Logistics Mesh</div>
+          <div class="desc">Stock · Pickups · Manufacturing</div>
+        </div>
+        <span class="nav-badge">Live</span>
+      </div>
+
+      <!-- Trust Protocols -->
+      <div class="nav-item trust" onclick="switchPage('trust', this)">
+        <div class="nav-icon">🛡️</div>
+        <div class="nav-info">
+          <div class="name">Trust Protocols</div>
+          <div class="desc">Escrow · Verification · Dispatch</div>
+        </div>
+      </div>
+
+      <div class="sidebar-label" style="padding-top:20px;">System</div>
+      <div class="nav-item" onclick="void(0)" style="cursor:default;opacity:0.5;">
+        <div class="nav-icon">⚙️</div>
+        <div class="nav-info">
+          <div class="name">Settings</div>
+          <div class="desc">Configuration & API keys</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="sidebar-footer">
+      <div>
+        <span class="status-dot"></span>
+        <span class="status-text">All 3 agents operational</span>
+      </div>
+      <div style="margin-top:8px;font-size:11px;color:var(--text-muted);">
+        v1.0.0 · 3 active sessions
+      </div>
+    </div>
+  </aside>
+
+  <!-- ── Main Area ──────────────────────────────────── -->
+  <div class="main">
+
+    <!-- Header -->
+    <header class="header">
+      <div class="header-left">
+        <button class="sidebar-toggle" id="sidebarToggle" onclick="toggleSidebar()">☰</button>
+        <div>
+          <div class="header-breadcrumb">
+            <span>AIAgentCloud</span>
+            <span class="separator">/</span>
+            <span id="breadcrumbCurrent">Overview</span>
+          </div>
+          <h1 id="pageTitle">Dashboard</h1>
+        </div>
+      </div>
+      <div class="header-right">
+        <button class="header-btn" title="Notifications">🔔</button>
+        <button class="header-btn" title="API Docs" onclick="window.open('http://localhost:8000/docs','_blank')">📖</button>
+        <div class="header-avatar">ST</div>
+      </div>
+    </header>
+
+    <!-- Content -->
+    <div class="content">
+
+      <!-- ════ OVERVIEW ════ -->
+      <div class="page-section active" id="page-overview">
+        <div class="welcome">
+          <h2>Welcome back, Operator</h2>
+          <p>Your B2B operations hub — all three agent pillars are synchronized and ready.</p>
+        </div>
+
+        <div class="stats-grid">
+          <div class="stat-card">
+            <div class="stat-icon">💰</div>
+            <div class="stat-value" style="color:var(--accent-blue);">47</div>
+            <div class="stat-label">Invoices processed today</div>
+            <div class="stat-change up">↑ 12% vs yesterday</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-icon">🚚</div>
+            <div class="stat-value" style="color:var(--accent-green);">14</div>
+            <div class="stat-label">Active shipments</div>
+            <div class="stat-change up">↑ 8% vs yesterday</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-icon">🛡️</div>
+            <div class="stat-value" style="color:var(--accent-purple);">6</div>
+            <div class="stat-label">Active escrow milestones</div>
+            <div class="stat-change up">↑ 3 new today</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-icon">⚡</div>
+            <div class="stat-value" style="color:var(--accent-amber);">98.7%</div>
+            <div class="stat-label">System uptime (30d)</div>
+            <div class="stat-change up">↑ 0.3%</div>
+          </div>
+        </div>
+
+        <div class="section-title">
+          Agent Pillars
+          <span class="badge">3 active</span>
+        </div>
+
+        <div class="agent-cards">
+
+          <div class="agent-card finance-card" onclick="switchPage('finance')">
+            <div class="card-header">
+              <div class="card-icon">💰</div>
+              <div>
+                <div class="card-title">Financial Operations Agent</div>
+                <div class="card-subtitle">Invoice management · Payment terms · Group buying</div>
+              </div>
+            </div>
+            <div class="card-metrics">
+              <div class="metric">
+                <div class="metric-value" style="color:var(--accent-blue);">$84.2K</div>
+                <div class="metric-label">Processed volume</div>
+              </div>
+              <div class="metric">
+                <div class="metric-value" style="color:var(--accent-green);">12</div>
+                <div class="metric-label">Terms optimized</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="agent-card logistics-card" onclick="switchPage('logistics')">
+            <div class="card-header">
+              <div class="card-icon">🚚</div>
+              <div>
+                <div class="card-title">Supply Chain & Procurement Agent</div>
+                <div class="card-subtitle">Stock lookups · Pickups · Batch manufacturing</div>
+              </div>
+            </div>
+            <div class="card-metrics">
+              <div class="metric">
+                <div class="metric-value" style="color:var(--accent-green);">14</div>
+                <div class="metric-label">Suppliers contacted</div>
+              </div>
+              <div class="metric">
+                <div class="metric-value" style="color:var(--accent-blue);">8</div>
+                <div class="metric-label">Active shipments</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="agent-card trust-card" onclick="switchPage('trust')">
+            <div class="card-header">
+              <div class="card-icon">🛡️</div>
+              <div>
+                <div class="card-title">Trust, Verification & Dispatch Agent</div>
+                <div class="card-subtitle">Escrow · Background checks · Emergency dispatch</div>
+              </div>
+            </div>
+            <div class="card-metrics">
+              <div class="metric">
+                <div class="metric-value" style="color:var(--accent-purple);">6</div>
+                <div class="metric-label">Active milestones</div>
+              </div>
+              <div class="metric">
+                <div class="metric-value" style="color:var(--accent-green);">2</div>
+                <div class="metric-label">Techs dispatched today</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Activity Feed -->
+        <div class="activity-card">
+          <div class="activity-header">
+            <h3>Recent Activity</h3>
+            <a href="#">View all →</a>
+          </div>
+          <div class="activity-item">
+            <span class="activity-dot green"></span>
+            <div class="activity-body">
+              <div class="activity-text"><strong>Invoice #INV-2048</strong> paid — $12,400.00 received from <strong>VENDOR-042</strong></div>
+              <div class="activity-time">2 minutes ago · Finance Agent</div>
+            </div>
+          </div>
+          <div class="activity-item">
+            <span class="activity-dot blue"></span>
+            <div class="activity-body">
+              <div class="activity-text">Dispatch route created for <strong>Pickup #PK-331</strong> — 3 suppliers, estimated 28 min</div>
+              <div class="activity-time">14 minutes ago · Logistics Agent</div>
+            </div>
+          </div>
+          <div class="activity-item">
+            <span class="activity-dot purple"></span>
+            <div class="activity-body">
+              <div class="activity-text">Milestone <strong>ESC-017</strong> released — $3,200 approved to freelancer <strong>DEV-084</strong></div>
+              <div class="activity-time">32 minutes ago · Trust Agent</div>
+            </div>
+          </div>
+          <div class="activity-item">
+            <span class="activity-dot amber"></span>
+            <div class="activity-body">
+              <div class="activity-text">⚠️ <strong>SUPP-203</strong> background verification flagged — additional documents requested</div>
+              <div class="activity-time">1 hour ago · Trust Agent</div>
+            </div>
+          </div>
+          <div class="activity-item">
+            <span class="activity-dot green"></span>
+            <div class="activity-body">
+              <div class="activity-text"><strong>Group Buy #GB-009</strong> closed — 12 restaurants pooled for wholesale grain, saved $2,140 total</div>
+              <div class="activity-time">2 hours ago · Finance Agent</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ════ FINANCE CORE ════ -->
+      <div class="page-section" id="page-finance">
+        <div class="page-header">
+          <div>
+            <h2>💳 Finance Core</h2>
+            <div class="page-subtitle">Invoice management, payment terms optimization, and group-buying pooling</div>
+          </div>
+          <button class="page-action blue">+ New Invoice</button>
+        </div>
+
+        <div class="detail-grid">
+          <div>
+            <div class="data-table">
+              <div class="table-header">
+                <span>Recent Invoices</span>
+                <span style="font-weight:400;font-size:12px;color:var(--text-muted);">47 processed today</span>
+              </div>
+              <table>
+                <thead>
+                  <tr>
+                    <th>Invoice</th>
+                    <th>Vendor</th>
+                    <th>Amount</th>
+                    <th>Status</th>
+                    <th>Terms</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td><strong>INV-2048</strong></td>
+                    <td>VENDOR-042</td>
+                    <td>$12,400</td>
+                    <td><span class="status-tag paid">Paid</span></td>
+                    <td>Net 15</td>
+                  </tr>
+                  <tr>
+                    <td><strong>INV-2047</strong></td>
+                    <td>SUPP-188</td>
+                    <td>$8,230</td>
+                    <td><span class="status-tag pending">Pending</span></td>
+                    <td>Net 30</td>
+                  </tr>
+                  <tr>
+                    <td><strong>INV-2046</strong></td>
+                    <td>MFG-051</td>
+                    <td>$24,100</td>
+                    <td><span class="status-tag overdue">Overdue</span></td>
+                    <td>Net 7</td>
+                  </tr>
+                  <tr>
+                    <td><strong>INV-2045</strong></td>
+                    <td>VENDOR-039</td>
+                    <td>$3,560</td>
+                    <td><span class="status-tag paid">Paid</span></td>
+                    <td>Net 15</td>
+                  </tr>
+                  <tr>
+                    <td><strong>INV-2044</strong></td>
+                    <td>AGRI-112</td>
+                    <td>$16,780</td>
+                    <td><span class="status-tag pending">Pending</span></td>
+                    <td>Net 30</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <div class="info-panel">
+            <div class="info-card">
+              <div class="info-title">Payment Terms Optimization</div>
+              <div class="info-row">
+                <span class="key">Avg. days to pay</span>
+                <span class="value" style="color:var(--accent-green);">12.4 days</span>
+              </div>
+              <div class="info-row">
+                <span class="key">Terms improved</span>
+                <span class="value">12 contracts</span>
+              </div>
+              <div class="info-row">
+                <span class="key">Savings realized</span>
+                <span class="value" style="color:var(--accent-green);">$3,240</span>
+              </div>
+              <div class="info-row">
+                <span class="key">Credit profile</span>
+                <span class="value" style="color:var(--accent-amber);">BBB+</span>
+              </div>
+            </div>
+
+            <div class="info-card">
+              <div class="info-title">Group-Buying Pools</div>
+              <div class="info-row">
+                <span class="key">Active pools</span>
+                <span class="value">3</span>
+              </div>
+              <div class="info-row">
+                <span class="key">Participants</span>
+                <span class="value">28 restaurants</span>
+              </div>
+              <div class="info-row">
+                <span class="key">Total savings</span>
+                <span class="value" style="color:var(--accent-green);">$6,720</span>
+              </div>
+              <div class="info-row">
+                <span class="key">Next pool closes</span>
+                <span class="value">Mar 18</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ════ LOGISTICS MESH ════ -->
+      <div class="page-section" id="page-logistics">
+        <div class="page-header">
+          <div>
+            <h2>🚚 Logistics Mesh</h2>
+            <div class="page-subtitle">Real-time stock lookups, pickup routing, and contract manufacturing matching</div>
+          </div>
+          <button class="page-action green">+ New Shipment</button>
+        </div>
+
+        <div class="detail-grid">
+          <div>
+            <div class="data-table">
+              <div class="table-header">
+                <span>Active Shipments</span>
+                <span style="font-weight:400;font-size:12px;color:var(--text-muted);">8 in transit</span>
+              </div>
+              <table>
+                <thead>
+                  <tr>
+                    <th>Shipment</th>
+                    <th>Supplier</th>
+                    <th>ETA</th>
+                    <th>Status</th>
+                    <th>Items</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td><strong>PK-331</strong></td>
+                    <td>SUPP-042</td>
+                    <td>12 min</td>
+                    <td><span class="status-tag in-transit">In Transit</span></td>
+                    <td>Raw Material A</td>
+                  </tr>
+                  <tr>
+                    <td><strong>PK-330</strong></td>
+                    <td>MFG-051</td>
+                    <td>28 min</td>
+                    <td><span class="status-tag in-transit">In Transit</span></td>
+                    <td>Batch #12</td>
+                  </tr>
+                  <tr>
+                    <td><strong>PK-329</strong></td>
+                    <td>AGRI-112</td>
+                    <td>—</td>
+                    <td><span class="status-tag pending">Awaiting Pickup</span></td>
+                    <td>Grain (500 kg)</td>
+                  </tr>
+                  <tr>
+                    <td><strong>PK-328</strong></td>
+                    <td>VENDOR-039</td>
+                    <td>45 min</td>
+                    <td><span class="status-tag in-transit">In Transit</span></td>
+                    <td>Electronics</td>
+                  </tr>
+                  <tr>
+                    <td><strong>PK-327</strong></td>
+                    <td>SUPP-188</td>
+                    <td>—</td>
+                    <td><span class="status-tag delivered">Delivered</span></td>
+                    <td>Packaging</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <div class="info-panel">
+            <div class="info-card">
+              <div class="info-title">Supplier Inventory Dashboard</div>
+              <div class="info-row">
+                <span class="key">Suppliers online</span>
+                <span class="value" style="color:var(--accent-green);">14 of 14</span>
+              </div>
+              <div class="info-row">
+                <span class="key">Items low stock</span>
+                <span class="value" style="color:var(--accent-rose);">3</span>
+              </div>
+              <div class="info-row">
+                <span class="key">Avg. response time</span>
+                <span class="value">1.8 sec</span>
+              </div>
+              <div class="info-row">
+                <span class="key">Stock accuracy</span>
+                <span class="value" style="color:var(--accent-green);">99.2%</span>
+              </div>
+            </div>
+
+            <div class="info-card">
+              <div class="info-title">Contract Manufacturing</div>
+              <div class="info-row">
+                <span class="key">Active runs</span>
+                <span class="value">4</span>
+              </div>
+              <div class="info-row">
+                <span class="key">Available capacity</span>
+                <span class="value">2,400 units</span>
+              </div>
+              <div class="info-row">
+                <span class="key">Avg. lead time</span>
+                <span class="value">6.2 days</span>
+              </div>
+              <div class="info-row">
+                <span class="key">Match rate</span>
+                <span class="value" style="color:var(--accent-green);">94%</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ════ TRUST PROTOCOLS ════ -->
+      <div class="page-section" id="page-trust">
+        <div class="page-header">
+          <div>
+            <h2>🛡️ Trust Protocols</h2>
+            <div class="page-subtitle">Milestone escrow, supplier verification, and emergency technician dispatch</div>
+          </div>
+          <button class="page-action purple">+ New Escrow</button>
+        </div>
+
+        <div class="detail-grid">
+          <div>
+            <div class="data-table">
+              <div class="table-header">
+                <span>Active Escrows & Milestones</span>
+                <span style="font-weight:400;font-size:12px;color:var(--text-muted);">6 active</span>
+              </div>
+              <table>
+                <thead>
+                  <tr>
+                    <th>Escrow</th>
+                    <th>Party</th>
+                    <th>Amount</th>
+                    <th>Milestone</th>
+                    <th>Status</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td><strong>ESC-017</strong></td>
+                    <td>DEV-084</td>
+                    <td>$3,200</td>
+                    <td>API Integration</td>
+                    <td><span class="status-tag paid">Released</span></td>
+                  </tr>
+                  <tr>
+                    <td><strong>ESC-016</strong></td>
+                    <td>DES-021</td>
+                    <td>$1,800</td>
+                    <td>UI Mockups</td>
+                    <td><span class="status-tag in-transit">In Review</span></td>
+                  </tr>
+                  <tr>
+                    <td><strong>ESC-015</strong></td>
+                    <td>ENG-055</td>
+                    <td>$8,000</td>
+                    <td>Backend MVP</td>
+                    <td><span class="status-tag pending">Funded</span></td>
+                  </tr>
+                  <tr>
+                    <td><strong>ESC-014</strong></td>
+                    <td>WR-009</td>
+                    <td>$2,500</td>
+                    <td>Documentation</td>
+                    <td><span class="status-tag paid">Released</span></td>
+                  </tr>
+                  <tr>
+                    <td><strong>ESC-013</strong></td>
+                    <td>SUPP-203</td>
+                    <td>$15,000</td>
+                    <td>Supplier Onboarding</td>
+                    <td><span class="status-tag overdue">On Hold</span></td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <div class="info-panel">
+            <div class="info-card">
+              <div class="info-title">Verification Queue</div>
+              <div class="info-row">
+                <span class="key">Pending verifications</span>
+                <span class="value" style="color:var(--accent-amber);">3</span>
+              </div>
+              <div class="info-row">
+                <span class="key">Avg. turnaround</span>
+                <span class="value">4.2 hours</span>
+              </div>
+              <div class="info-row">
+                <span class="key">Flagged entities</span>
+                <span class="value" style="color:var(--accent-rose);">1</span>
+              </div>
+              <div class="info-row">
+                <span class="key">Clearance rate</span>
+                <span class="value" style="color:var(--accent-green);">97%</span>
+              </div>
+            </div>
+
+            <div class="info-card">
+              <div class="info-title">Emergency Dispatch</div>
+              <div class="info-row">
+                <span class="key">Technicians available</span>
+                <span class="value">8</span>
+              </div>
+              <div class="info-row">
+                <span class="key">Avg. dispatch time</span>
+                <span class="value">24 min</span>
+              </div>
+              <div class="info-row">
+                <span class="key">Completed today</span>
+                <span class="value">2</span>
+              </div>
+              <div class="info-row">
+                <span class="key">Coverage radius</span>
+                <span class="value">50 km</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div><!-- /content -->
+  </div><!-- /main -->
+
+  <script>
+    // ── Page Switching ──────────────────────────────────
+    function switchPage(pageId, navEl) {
+      // Hide all pages
+      document.querySelectorAll('.page-section').forEach(p => p.classList.remove('active'));
+
+      // Show target page
+      const target = document.getElementById('page-' + pageId);
+      if (target) target.classList.add('active');
+
+      // Update nav items
+      document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+      if (navEl) navEl.classList.add('active');
+      else {
+        // Find nav item by data attribute or text
+        document.querySelectorAll('.nav-item').forEach(n => {
+          if (n.textContent.toLowerCase().includes(pageId)) n.classList.add('active');
+        });
+      }
+
+      // Update breadcrumb and title
+      const titles = {
+        overview: 'Dashboard',
+        finance: 'Finance Core',
+        logistics: 'Logistics Mesh',
+        trust: 'Trust Protocols',
+      };
+
+      document.getElementById('breadcrumbCurrent').textContent = titles[pageId] || pageId;
+      document.getElementById('pageTitle').textContent = titles[pageId] || 'Dashboard';
+
+      // Close mobile sidebar
+      document.getElementById('sidebar').classList.remove('open');
+      document.getElementById('mobileOverlay').classList.remove('active');
+    }
+
+    // ── Mobile Sidebar Toggle ──────────────────────────
+    function toggleSidebar() {
+      document.getElementById('sidebar').classList.toggle('open');
+      document.getElementById('mobileOverlay').classList.toggle('active');
+    }
+
+    document.getElementById('mobileOverlay').addEventListener('click', toggleSidebar);
+  </script>
+</body>
+</html>
