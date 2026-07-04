@@ -5,7 +5,7 @@
 [![Colab](https://img.shields.io/badge/Open_in_Colab-F9AB00?style=for-the-badge&logo=googlecolab&logoColor=white)](https://colab.research.google.com/drive/1OqX7FFDkzI2xH-q-zNQJLq0H4Bj7iLdn#scrollTo=AdK4gpC-5rWH)
 [![Python](https://img.shields.io/badge/Python_3.10+-3776AB?style=for-the-badge&logo=python&logoColor=white)](https://python.org)
 [![Hugging Face](https://img.shields.io/badge/🤗_Hugging_Face-FFD21E?style=for-the-badge)](https://huggingface.co/google/gemma-4-E2B-it)
-[![License](https://img.shields.io/badge/License-MIT-green?style=for-the-badge)](LICENSE)
+[![License](https://img.shields.io/badge/License-MIT-green?style=for-the-badge)](https://github.com/saikirantechy/AIAgentCloud/blob/main/LICENSE)
 
 ---
 
